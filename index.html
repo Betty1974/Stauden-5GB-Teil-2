@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wiederholung Stauden, 5GB Teil 2</title>
+
+<style>
+body{
+  font-family:Arial,sans-serif;
+  max-width:800px;
+  margin:30px auto;
+  padding:20px;
+  background:#f5f7f4;
+  color:#222;
+}
+.card{
+  background:white;
+  padding:28px;
+  border-radius:16px;
+  box-shadow:0 4px 18px rgba(0,0,0,.10);
+}
+h1{margin-top:0}
+.small{font-size:14px;color:#666}
+.question{
+  font-size:25px;
+  font-weight:bold;
+  margin:25px 0;
+}
+input{
+  box-sizing:border-box;
+  width:100%;
+  padding:14px;
+  font-size:19px;
+  border:2px solid #aaa;
+  border-radius:10px;
+}
+button{
+  margin-top:12px;
+  margin-right:8px;
+  padding:12px 18px;
+  font-size:16px;
+  cursor:pointer;
+  border-radius:9px;
+  border:1px solid #888;
+}
+#feedback{
+  min-height:35px;
+  margin-top:18px;
+  font-size:20px;
+  font-weight:bold;
+}
+.correct{color:#16752d}
+.wrong{color:#b12626}
+#next{display:none}
+.status{
+  margin-top:20px;
+  padding-top:15px;
+  border-top:1px solid #ddd;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>🌿 Wiederholung Stauden, 5GB Teil 2</h1>
+
+<p>
+Schreibe den botanischen Namen der Pflanze.
+Groß- und Kleinschreibung spielen keine Rolle.
+Bei Hybridnamen werden <b>×</b>, <b>x</b> und <b>*</b> akzeptiert.
+</p>
+
+<div class="small" id="progress"></div>
+
+<div class="question" id="question"></div>
+
+<input
+  id="answer"
+  type="text"
+  autocomplete="off"
+  autocapitalize="none"
+  spellcheck="false"
+  placeholder="Botanischen Namen eingeben"
+>
+
+<br>
+
+<button type="button" id="check">Antwort prüfen</button>
+<button type="button" id="solution">Lösung anzeigen</button>
+<button type="button" id="next">Nächste Pflanze</button>
+
+<div id="feedback"></div>
+
+<div class="status">
+  Punkte: <b id="points">0</b>
+</div>
+
+</div>
+
+<script>
+var plants = [
+
+{bot:"Agastache",de:"Garten-Duftnessel",accept:["agastache"]},
+
+{bot:"Alchemilla mollis",de:"Weicher Frauenmantel",
+accept:["alchemilla mollis"]},
+
+{bot:"Baptisia australis",de:"Blaue Färberhülse",
+accept:["baptisia australis"]},
+
+{bot:"Brunnera macrophylla",
+de:"Großblatt-Kaukasusvergissmeinnicht",
+accept:["brunnera macrophylla"]},
+
+{bot:"Carex pendula",
+de:"Hänge-Segge / Riesen-Segge",
+accept:["carex pendula"]},
+
+{bot:"Clinopodium nepeta",
+de:"Kleinblüten-Bergminze",
+accept:["clinopodium nepeta","calamintha nepeta"]},
+
+{bot:"Epimedium × perralchicum",
+de:"Garten-Sockenblume",
+accept:["epimedium × perralchicum"]},
+
+{bot:"Epimedium × versicolor",
+de:"Verschiedenfarbige Sockenblume",
+accept:["epimedium × versicolor"]},
+
+{bot:"Galatella linosyris",
+de:"Goldhaar-Aster",
+accept:["galatella linosyris"]},
+
+{bot:"Geranium nodosum",
+de:"Knoten-Storchschnabel",
+accept:["geranium nodosum"]},
+
+{bot:"Helenium",
+de:"Garten-Sonnenbraut",
+accept:["helenium"]},
+
+{bot:"Helianthemum",
+de:"Garten-Sonnenröschen",
+accept:["helianthemum"]},
+
+{bot:"Helianthus microcephalus",
+de:"Kleinköpfige Sonnenblume",
+accept:["helianthus microcephalus"]},
+
+{bot:"Stachys byzantina",
+de:"Woll-Ziest",
+accept:["stachys byzantina"]},
+
+{bot:"Kalimeris incisa",
+de:"Schönaster",
+accept:["kalimeris incisa"]},
+
+{bot:"Luzula sylvatica",
+de:"Wald-Hainsimse",
+accept:["luzula sylvatica"]},
+
+{bot:"Monarda",
+de:"Monarde / Indianernessel",
+accept:["monarda"]},
+
+{bot:"Oenothera fruticosa",
+de:"Nachtkerze",
+accept:["oenothera fruticosa"]},
+
+{bot:"Pachysandra terminalis",
+de:"Japanischer Ysander",
+accept:["pachysandra terminalis"]},
+
+{bot:"Paeonia lactiflora",
+de:"Chinesische Pfingstrose",
+accept:["paeonia lactiflora"]},
+
+{bot:"Papaver orientale",
+de:"Türkischer Mohn",
+accept:["papaver orientale"]},
+
+{bot:"Phedimus florifer",
+de:"Reichblüten-Asienfetthenne",
+accept:["phedimus florifer","sedum floriferum"]},
+
+{bot:"Phlomis russeliana",
+de:"Türkisches Brandkraut",
+accept:["phlomis russeliana"]},
+
+{bot:"Polygonatum",
+de:"Salomonssiegel / Weißwurz",
+accept:["polygonatum"]},
+
+{bot:"Rodgersia",
+de:"Schaublatt",
+accept:["rodgersia"]},
+
+{bot:"Rudbeckia subtomentosa",
+de:"Schwachfilziger Sonnenhut",
+accept:["rudbeckia subtomentosa"]},
+
+{bot:"Salvia nemorosa",
+de:"Steppen-Salbei",
+accept:["salvia nemorosa"]},
+
+{bot:"Salvia rosmarinus",
+de:"Gewürz-Rosmarin",
+accept:["salvia rosmarinus"]},
+
+{bot:"Salvia officinalis",
+de:"Garten-Salbei",
+accept:["salvia officinalis"]},
+
+{bot:"Teucrium × lucidrys",
+de:"Hybrid-Gamander",
+accept:["teucrium × lucidrys"]},
+
+{bot:"Thymus vulgaris",
+de:"Gewürz-Thymian",
+accept:["thymus vulgaris"]},
+
+{bot:"Verbascum",
+de:"Königskerze",
+accept:["verbascum"]},
+
+{bot:"Waldsteinia geoides",
+de:"Horst-Waldsteinie",
+accept:["waldsteinia geoides"]},
+
+{bot:"Waldsteinia ternata",
+de:"Kriech-Waldsteinie / Dreiblatt-Waldsteinie",
+accept:["waldsteinia ternata"]},
+
+{bot:"Acanthus mollis",
+de:"Pracht-Akanthus / Bärenklaue",
+accept:["acanthus mollis"]},
+
+{bot:"Aconitum carmichaelii 'Arendsii'",
+de:"Herbst-Eisenhut",
+accept:["aconitum carmichaelii 'arendsii'"]},
+
+{bot:"Artemisia ludoviciana",
+de:"Edelraute / Beifuß / Wermut",
+accept:["artemisia ludoviciana"]},
+
+{bot:"Aster amellus",
+de:"Berg-Aster",
+accept:["aster amellus"]},
+
+{bot:"Campanula persicifolia",
+de:"Pfirsichblättrige Glockenblume",
+accept:["campanula persicifolia"]},
+
+{bot:"Eryngium planum",
+de:"Mannstreu / Edeldistel",
+accept:["eryngium planum"]},
+
+{bot:"Galatella linosyris",
+de:"Goldhaar-Aster",
+accept:["galatella linosyris"]},
+
+{bot:"Helenium",
+de:"Garten-Sonnenbraut",
+accept:["helenium"]},
+
+{bot:"Hylotelephium spectabile 'Iceberg'",
+de:"Pracht-Fetthenne",
+accept:["hylotelephium spectabile 'iceberg'"]},
+
+{bot:"Kniphofia",
+de:"Fackellilie",
+accept:["kniphofia"]},
+
+{bot:"Liatris",
+de:"Prachtscharte",
+accept:["liatris"]},
+
+{bot:"Origanum vulgare",
+de:"Gewöhnlicher Dost / Oregano",
+accept:["origanum vulgare"]},
+
+{bot:"Solidago",
+de:"Goldrute",
+accept:["solidago"]},
+
+{bot:"Symphyotrichum novae-angliae",
+de:"Rauhblatt-Aster",
+accept:[
+"symphyotrichum novae-angliae",
+"aster novae-angliae"
+]},
+
+{bot:"Symphyotrichum novi-belgii",
+de:"Glattblatt-Aster",
+accept:[
+"symphyotrichum novi-belgii",
+"aster novi-belgii"
+]},
+
+{bot:"Valeriana ruber",
+de:"Rote Spornblume",
+accept:["valeriana ruber"]},
+
+{bot:"Liriope muscari",
+de:"Breitblatt-Liliengras",
+accept:["liriope muscari"]},
+
+{bot:"Panicum virgatum 'Cheyenne Sky'",
+de:"Purpur-Rutenhirse",
+accept:["panicum virgatum 'cheyenne sky'"]},
+
+{bot:"Oenothera macrocarpa",
+de:"Missouri-Nachtkerze",
+accept:["oenothera macrocarpa"]}
+
+];
+
+var pos = 0;
+var points = 0;
+var solved = false;
+
+function el(id){
+  return document.getElementById(id);
+}
+
+function clean(s){
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[✕×*]/g,"x")
+    .replace(/\s+x\s+/g," x ")
+    .replace(/[’‘`´]/g,"'")
+    .replace(/^\s+|\s+$/g,"")
+    .replace(/\s+/g," ");
+}
+
+function show(){
+  solved = false;
+
+  el("question").textContent = plants[pos].de;
+  el("progress").textContent =
+    "Pflanze " + (pos + 1) + " von " + plants.length;
+
+  el("answer").value = "";
+  el("feedback").textContent = "";
+  el("feedback").className = "";
+
+  el("next").style.display = "none";
+  el("check").disabled = false;
+
+  el("answer").focus();
+}
+
+function checkAnswer(){
+
+  if(solved) return;
+
+  var raw = el("answer").value;
+  var typed = clean(raw);
+  var accepted = plants[pos].accept;
+  var isRight = false;
+
+  for(var j = 0; j < accepted.length; j++){
+    if(typed === clean(accepted[j])){
+      isRight = true;
+      break;
+    }
+  }
+
+  if(isRight){
+
+    solved = true;
+    points++;
+
+    el("points").textContent = points;
+
+    el("feedback").textContent = "✓ RICHTIG!";
+    el("feedback").className = "correct";
+
+    el("next").style.display = "inline-block";
+    el("check").disabled = true;
+
+  } else {
+
+    el("feedback").textContent =
+      "Noch nicht richtig. Erkannt wurde: „" +
+      typed +
+      "“. Versuch es noch einmal.";
+
+    el("feedback").className = "wrong";
+  }
+}
+
+function showSolution(){
+
+  el("feedback").textContent =
+    "Lösung: " + plants[pos].bot;
+
+  el("feedback").className = "";
+
+  el("next").style.display = "inline-block";
+}
+
+function nextPlant(){
+
+  pos++;
+
+  if(pos >= plants.length){
+
+    el("question").textContent = "🎉 Geschafft!";
+    el("progress").textContent = "";
+
+    el("feedback").textContent =
+      "Du hast " + points +
+      " von " + plants.length +
+      " Punkten erreicht.";
+
+    el("answer").style.display = "none";
+    el("check").style.display = "none";
+    el("solution").style.display = "none";
+    el("next").style.display = "none";
+
+    return;
+  }
+
+  show();
+}
+
+el("check").onclick = checkAnswer;
+el("solution").onclick = showSolution;
+el("next").onclick = nextPlant;
+
+el("answer").addEventListener("keydown",function(e){
+  if(e.key === "Enter"){
+    e.preventDefault();
+    checkAnswer();
+  }
+});
+
+show();
+
+</script>
+
+</body>
+</html>
